@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pomodoro Timer</title>
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background-image: url("123.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+    }
+
+    .container {
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(8px);
+      padding: 40px 60px;
+      border-radius: 24px;
+      text-align: center;
+      width: 360px;
+    }
+
+    /* 상단 모드 버튼 */
+    .modes {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 30px;
+    }
+
+    .mode-btn {
+      border: 1px solid white;
+      background: transparent;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .mode-btn.active {
+      background: white;
+      color: black;
+      font-weight: 600;
+    }
+
+    /* 타이머 */
+    .time {
+      font-size: 72px;
+      font-weight: 700;
+      margin: 30px 0;
+    }
+
+    /* 하단 버튼 영역 */
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .control-btn {
+      background: white;
+      color: black;
+      border: none;
+      padding: 10px 26px;
+      border-radius: 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    /* 🔥 아이콘 버튼 (중지 / 리셋) */
+    .icon-btn {
+      background: transparent;
+      border: 2px solid white;
+      color: white;
+
+      width: 68px;
+      height: 68px;
+
+      border-radius: 50%;
+
+      font-size: 36px;
+      font-weight: 700;
+
+      cursor: pointer;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <!-- 모드 선택 -->
+    <div class="modes">
+      <button class="mode-btn active" onclick="setMode('pomodoro', this)">pomodoro</button>
+      <button class="mode-btn" onclick="setMode('short', this)">short break</button>
+      <button class="mode-btn" onclick="setMode('long', this)">long break</button>
+    </div>
+
+    <!-- 시간 표시 -->
+    <div class="time" id="time">25:00</div>
+
+    <!-- 컨트롤 버튼 -->
+    <div class="controls">
+      <button class="control-btn" onclick="startTimer()">start</button>
+
+      <button class="icon-btn" onclick="pauseTimer()">⏸</button>
+
+      <button class="icon-btn" onclick="resetTimer()">⟳</button>
+    </div>
+
+  </div>
+
+  <script>
+    let timer = null;
+    let currentMode = "pomodoro";
+
+    const modes = {
+      pomodoro: 25 * 60,
+      short: 5 * 60,
+      long: 15 * 60
+    };
+
+    let totalSeconds = modes[currentMode];
+
+    function updateDisplay() {
+      const m = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+      const s = String(totalSeconds % 60).padStart(2, "0");
+      document.getElementById("time").textContent = `${m}:${s}`;
+    }
+
+    function setMode(mode, el) {
+      clearInterval(timer);
+      timer = null;
+      currentMode = mode;
+      totalSeconds = modes[mode];
+      updateDisplay();
+
+      document.querySelectorAll(".mode-btn").forEach(btn =>
+        btn.classList.remove("active")
+      );
+      el.classList.add("active");
+    }
+
+    function startTimer() {
+      if (timer) return;
+
+      timer = setInterval(() => {
+        if (totalSeconds <= 0) {
+          clearInterval(timer);
+          timer = null;
+          alert("Time's up ⏰");
+          return;
+        }
+        totalSeconds--;
+        updateDisplay();
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      if (!timer) return;
+      clearInterval(timer);
+      timer = null;
+    }
+
+    function resetTimer() {
+      clearInterval(timer);
+      timer = null;
+      totalSeconds = modes[currentMode];
+      updateDisplay();
+    }
+
+    updateDisplay();
+  </script>
+
+</body>
+</html>
