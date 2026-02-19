@@ -1,90 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Window Timer</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700&display=swap');
+
 body {
-  margin: 0;
-  background-image: url("sky.png");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: white;
+    /* ✅ sky.png 배경 */
+    background-image: url("sky.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    font-family: 'Baloo 2', sans-serif;
 }
 
-/* 🔥 컨테이너 축소 */
+/* 카드 */
 .container {
-  background: rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(6px);
-  padding: 20px 24px;
-  border-radius: 18px;
-  text-align: center;
-  width: 260px;   /* 360 → 260 */
+    width: 260px;
+    padding: 25px;
+    border-radius: 20px;
+
+    /* 배경이 잘 보이도록 반투명 */
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(6px);
+
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    text-align: center;
 }
 
-/* 상단 모드 버튼 */
-.modes {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-
-.mode-btn {
-  border: 1px solid white;
-  background: transparent;
-  color: white;
-  padding: 4px 10px;
-  border-radius: 16px;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-.mode-btn.active {
-  background: white;
-  color: black;
-  font-weight: 600;
-}
-
-/* 🔥 타이머 폰트 축소 */
 .time {
-  font-size: 48px;   /* 72 → 48 */
-  font-weight: 700;
-  margin: 20px 0;
+    font-size: 34px;
+    font-weight: 700;
+    margin-bottom: 20px;
 }
 
-/* 하단 버튼 영역 */
-.controls {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  align-items: center;
+.buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
 }
 
-.control-btn {
-  background: white;
-  color: black;
-  border: none;
-  padding: 6px 18px;
-  border-radius: 18px;
-  font-size: 14px;
-  cursor: pointer;
+button {
+    flex: 1;
+    padding: 8px 0;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
 }
 
-/* 🔥 아이콘 버튼 축소 */
-.icon-btn {
-  background: transparent;
-  border: 2px solid white;
-  color: white;
+.start { background: #4ade80; }
+.pause { background: #facc15; }
+.reset { background: #f87171; }
 
-  width: 44px;   /* 68 → 44 */
-  height: 44px;
-
-  border-radius: 50%;
-  font-size: 20px;
-
-  cursor: pointer;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
+button:hover {
+    opacity: 0.85;
 }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="time" id="display">00:00:00.000</div>
+    <div class="buttons">
+        <button class="start" onclick="startTimer()">Start</button>
+        <button class="pause" onclick="pauseTimer()">Pause</button>
+        <button class="reset" onclick="resetTimer()">Reset</button>
+    </div>
+</div>
+
+<script>
+let startTime = 0;
+let elapsedTime = 0;
+let timerInterval;
+
+function formatTime(ms) {
+    let hours = Math.floor(ms / (1000 * 60 * 60));
+    let minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+    let seconds = Math.floor((ms % (1000 * 60)) / 1000);
+    let milliseconds = ms % 1000;
+
+    return (
+        String(hours).padStart(2, '0') + ":" +
+        String(minutes).padStart(2, '0') + ":" +
+        String(seconds).padStart(2, '0') + "." +
+        String(milliseconds).padStart(3, '0')
+    );
+}
+
+function startTimer() {
+    startTime = Date.now() - elapsedTime;
+    timerInterval = setInterval(function () {
+        elapsedTime = Date.now() - startTime;
+        document.getElementById("display").textContent = formatTime(elapsedTime);
+    }, 10);
+}
+
+function pauseTimer() {
+    clearInterval(timerInterval);
+}
+
+function resetTimer() {
+    clearInterval(timerInterval);
+    elapsedTime = 0;
+    document.getElementById("display").textContent = "00:00:00.000";
+}
+</script>
+
+</body>
+</html>
