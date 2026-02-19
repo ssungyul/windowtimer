@@ -3,71 +3,79 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Window Timer</title>
+<title>Pomodoro Timer</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700&display=swap');
 
 body {
     margin: 0;
-    padding: 0;
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
+    font-family: 'Baloo 2', sans-serif;
 
-    /* ✅ sky.png 배경 */
-    background-image: url("sky.png");
+    /* ✅ 배경 */
+    background-image: url("123.png");
     background-size: cover;
     background-position: center;
-    background-repeat: no-repeat;
-
-    font-family: 'Baloo 2', sans-serif;
 }
 
-/* 카드 */
 .container {
-    width: 260px;
-    padding: 25px;
-    border-radius: 20px;
-
-    /* 배경이 잘 보이도록 반투명 */
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(6px);
-
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    width: 320px;
+    padding: 30px;
+    border-radius: 24px;
+    background: rgba(255,255,255,0.25);
+    backdrop-filter: blur(12px);
     text-align: center;
+    color: white;
 }
 
-.time {
-    font-size: 34px;
-    font-weight: 700;
+.mode-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
     margin-bottom: 20px;
 }
 
-.buttons {
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
-}
-
-button {
-    flex: 1;
-    padding: 8px 0;
+.mode-buttons button {
+    padding: 6px 12px;
+    border-radius: 20px;
     border: none;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 600;
     cursor: pointer;
-    transition: 0.2s;
+    font-size: 13px;
+    font-weight: 600;
+    background: rgba(255,255,255,0.3);
+    color: white;
 }
 
-.start { background: #4ade80; }
-.pause { background: #facc15; }
-.reset { background: #f87171; }
+.mode-buttons button.active {
+    background: white;
+    color: #333;
+}
 
-button:hover {
-    opacity: 0.85;
+.timer {
+    font-size: 56px;
+    font-weight: 700;
+    margin: 20px 0;
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.controls button {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    background: rgba(255,255,255,0.3);
+    color: white;
 }
 </style>
 </head>
@@ -75,50 +83,77 @@ button:hover {
 <body>
 
 <div class="container">
-    <div class="time" id="display">00:00:00.000</div>
-    <div class="buttons">
-        <button class="start" onclick="startTimer()">Start</button>
-        <button class="pause" onclick="pauseTimer()">Pause</button>
-        <button class="reset" onclick="resetTimer()">Reset</button>
+    <div class="mode-buttons">
+        <button onclick="setMode(25)" id="pomodoro" class="active">pomodoro</button>
+        <button onclick="setMode(5)" id="short">short break</button>
+        <button onclick="setMode(15)" id="long">long break</button>
+    </div>
+
+    <div class="timer" id="display">25:00</div>
+
+    <div class="controls">
+        <button onclick="startTimer()">▶</button>
+        <button onclick="pauseTimer()">⏸</button>
+        <button onclick="resetTimer()">⟳</button>
     </div>
 </div>
 
 <script>
-let startTime = 0;
-let elapsedTime = 0;
-let timerInterval;
+let timer;
+let timeLeft = 25 * 60;
+let isRunning = false;
+let currentMode = 25;
 
-function formatTime(ms) {
-    let hours = Math.floor(ms / (1000 * 60 * 60));
-    let minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
-    let seconds = Math.floor((ms % (1000 * 60)) / 1000);
-    let milliseconds = ms % 1000;
-
-    return (
-        String(hours).padStart(2, '0') + ":" +
+function updateDisplay() {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    document.getElementById("display").textContent =
         String(minutes).padStart(2, '0') + ":" +
-        String(seconds).padStart(2, '0') + "." +
-        String(milliseconds).padStart(3, '0')
-    );
+        String(seconds).padStart(2, '0');
 }
 
 function startTimer() {
-    startTime = Date.now() - elapsedTime;
-    timerInterval = setInterval(function () {
-        elapsedTime = Date.now() - startTime;
-        document.getElementById("display").textContent = formatTime(elapsedTime);
-    }, 10);
+    if (isRunning) return;
+    isRunning = true;
+
+    timer = setInterval(() => {
+        if (timeLeft > 0) {
+            timeLeft--;
+            updateDisplay();
+        } else {
+            clearInterval(timer);
+            isRunning = false;
+            alert("시간이 끝났어요! 🎉");
+        }
+    }, 1000);
 }
 
 function pauseTimer() {
-    clearInterval(timerInterval);
+    clearInterval(timer);
+    isRunning = false;
 }
 
 function resetTimer() {
-    clearInterval(timerInterval);
-    elapsedTime = 0;
-    document.getElementById("display").textContent = "00:00:00.000";
+    clearInterval(timer);
+    isRunning = false;
+    timeLeft = currentMode * 60;
+    updateDisplay();
 }
+
+function setMode(minutes) {
+    currentMode = minutes;
+    timeLeft = minutes * 60;
+    resetTimer();
+
+    document.querySelectorAll(".mode-buttons button")
+        .forEach(btn => btn.classList.remove("active"));
+
+    if (minutes === 25) document.getElementById("pomodoro").classList.add("active");
+    if (minutes === 5) document.getElementById("short").classList.add("active");
+    if (minutes === 15) document.getElementById("long").classList.add("active");
+}
+
+updateDisplay();
 </script>
 
 </body>
