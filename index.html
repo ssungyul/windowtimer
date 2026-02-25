@@ -15,8 +15,6 @@ body {
     justify-content: center;
     align-items: center;
     font-family: 'Baloo 2', sans-serif;
-
-    /* ✅ 배경 */
     background-image: url("123.png");
     background-size: cover;
     background-position: center;
@@ -99,50 +97,66 @@ body {
 </div>
 
 <script>
-let timer;
-let timeLeft = 25 * 60;
+let endTime = null;
+let remainingTime = 25 * 60;
 let isRunning = false;
 let currentMode = 25;
+let animationFrameId = null;
 
-function updateDisplay() {
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
+function updateDisplay(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
     document.getElementById("display").textContent =
         String(minutes).padStart(2, '0') + ":" +
-        String(seconds).padStart(2, '0');
+        String(secs).padStart(2, '0');
+}
+
+function tick() {
+    if (!isRunning) return;
+
+    const now = Date.now();
+    const diff = Math.max(0, Math.floor((endTime - now) / 1000));
+
+    updateDisplay(diff);
+
+    if (diff <= 0) {
+        isRunning = false;
+        cancelAnimationFrame(animationFrameId);
+        alert("시간이 끝났어요! 🎉");
+        return;
+    }
+
+    animationFrameId = requestAnimationFrame(tick);
 }
 
 function startTimer() {
     if (isRunning) return;
-    isRunning = true;
 
-    timer = setInterval(() => {
-        if (timeLeft > 0) {
-            timeLeft--;
-            updateDisplay();
-        } else {
-            clearInterval(timer);
-            isRunning = false;
-            alert("시간이 끝났어요! 🎉");
-        }
-    }, 1000);
+    isRunning = true;
+    endTime = Date.now() + remainingTime * 1000;
+    tick();
 }
 
 function pauseTimer() {
-    clearInterval(timer);
+    if (!isRunning) return;
+
     isRunning = false;
+    cancelAnimationFrame(animationFrameId);
+
+    const now = Date.now();
+    remainingTime = Math.max(0, Math.floor((endTime - now) / 1000));
 }
 
 function resetTimer() {
-    clearInterval(timer);
     isRunning = false;
-    timeLeft = currentMode * 60;
-    updateDisplay();
+    cancelAnimationFrame(animationFrameId);
+    remainingTime = currentMode * 60;
+    updateDisplay(remainingTime);
 }
 
 function setMode(minutes) {
     currentMode = minutes;
-    timeLeft = minutes * 60;
+    remainingTime = minutes * 60;
     resetTimer();
 
     document.querySelectorAll(".mode-buttons button")
@@ -153,7 +167,7 @@ function setMode(minutes) {
     if (minutes === 15) document.getElementById("long").classList.add("active");
 }
 
-updateDisplay();
+updateDisplay(remainingTime);
 </script>
 
 </body>
